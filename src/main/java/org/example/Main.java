@@ -10,8 +10,10 @@ public class Main {
 
 
     public static void main(String[] args) throws InterruptedException {
-        String discordToken = "";
-        JDABuilder builder = JDABuilder.createDefault("");
+        new ConfigManager();
+        String discordToken = ConfigManager.properties.getProperty("discordToken");
+        System.out.println(discordToken);
+        JDABuilder builder = JDABuilder.createDefault(discordToken);
         builder.setActivity(Activity.playing("Factorio"));
         bot = builder.build();
         bot.addEventListener(new SlashHandler());
@@ -25,7 +27,7 @@ public class Main {
                 Commands.slash("backup", "Backs up the server")
         ).queue();
 
-        FactorioManager fm = new FactorioManager("zY589s3DSQvFgWLIzVMD83", "sa-east-1", "1.1.100", "slot1");
+        FactorioManager fm = new FactorioManager(discordToken, "sa-east-1", "1.1.100", "slot1");
 
         System.out.println("Bot is ready!");
     }
