@@ -26,9 +26,7 @@ public class Main {
                 Commands.slash("status", "Gets the status of the server"),
                 Commands.slash("backup", "Backs up the server")
         ).queue();
-
         FactorioManager fm = new FactorioManager(discordToken, "sa-east-1", "1.1.100", "slot1");
-
         System.out.println("Bot is ready!");
     }
 

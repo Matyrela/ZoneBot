@@ -15,6 +15,7 @@ import java.net.http.HttpResponse;
 import java.net.http.WebSocket;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.sql.Timestamp;
 import java.util.Formatter;
 import java.util.concurrent.CompletionStage;
 
@@ -86,7 +87,7 @@ public class FactorioManager {
         }
     }
 
-    public void backupServer() {
+    public String backupServer() {
 
         OkHttpClient client = new OkHttpClient().newBuilder()
                 .build();
@@ -100,15 +101,15 @@ public class FactorioManager {
                 .build();
         try {
             Response response = client.newCall(request).execute();
+            String fileName = new Timestamp(System.currentTimeMillis()).toString().replaceAll("-", "").replaceAll(":", "") + ".zip";
             byte[] bytes = response.body().bytes();
-
-                // Guarda los bytes en un archivo
-                Path filePath = Path.of("backup.zip");
-                Files.write(filePath, bytes);            
+            Path filePath = Path.of(fileName);
+            Files.write(filePath, bytes);
+            return fileName;
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
+        return "";
 
     }
 }
