@@ -7,12 +7,11 @@ import net.dv8tion.jda.api.interactions.commands.build.Commands;
 
 public class Main {
     static JDA bot;
-
-
     public static void main(String[] args) throws InterruptedException {
         new ConfigManager();
         String discordToken = ConfigManager.properties.getProperty("discordToken");
-        System.out.println(discordToken);
+        String factorioToken = ConfigManager.properties.getProperty("factorioToken");
+        System.out.println(discordToken + " " + factorioToken);
         JDABuilder builder = JDABuilder.createDefault(discordToken);
         builder.setActivity(Activity.playing("Factorio"));
         bot = builder.build();
@@ -26,7 +25,7 @@ public class Main {
                 Commands.slash("status", "Gets the status of the server"),
                 Commands.slash("backup", "Backs up the server")
         ).queue();
-        FactorioManager fm = new FactorioManager(discordToken, "sa-east-1", "1.1.100", "slot1");
+        FactorioManager fm = new FactorioManager(factorioToken, "sa-east-1", "1.1.94", "slot1");
         System.out.println("Bot is ready!");
     }
 

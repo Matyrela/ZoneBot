@@ -46,21 +46,29 @@ public class FactorioManager {
     }
 
     public void startServer() {
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create("https://factorio.zone/api/instance/start"))
-                .header("Content-Type", "application/x-www-form-urlencoded")
-                .POST(HttpRequest.BodyPublishers.ofString(new Formatter()
-                        .format("visitSecret=%s&region=%s&version=%s&save=%s", token, region, version, save)
-                        .toString()))
+        OkHttpClient client = new OkHttpClient().newBuilder()
                 .build();
-
-        HttpClient client = HttpClient.newHttpClient();
+        MediaType mediaType = MediaType.parse("application/x-www-form-urlencoded");
+        String requestBodyString = "visitSecret=" + token + "&region=" + region + "&version=" + version + "&save="
+                + save;
+        System.out.println(requestBodyString);
+        RequestBody body = RequestBody.create(requestBodyString, mediaType);
+        Request request = new Request.Builder()
+                .url("https://factorio.zone/api/instance/start")
+                .method("POST", body)
+                .addHeader("Content-Type", "application/x-www-form-urlencoded")
+                .build();
+        Response response;
         try {
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            launchId = Integer.parseInt(response.body().split(",\"launchId\":")[1].replace("}", ""));
-        } catch (Exception e) {
+            response = client.newCall(request).execute();
+            System.out.println(response.body().string());
+            String launchIdValue = response.body().toString().split("\"launchId\":")[1].split(",")[0];
+            this.launchId = Integer.parseInt(launchIdValue);
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
             e.printStackTrace();
         }
+
     }
 
     public void stopServer() {
@@ -92,7 +100,7 @@ public class FactorioManager {
         OkHttpClient client = new OkHttpClient().newBuilder()
                 .build();
         MediaType mediaType = MediaType.parse("application/x-www-form-urlencoded");
-        String requestBodyString = "save=slot1&visitSecret=VdFtqH3OXheOCYRp4XBEEb";
+        String requestBodyString = "save=" + save + "&visitSecret=" + token;
         RequestBody body = RequestBody.create(requestBodyString, mediaType);
         Request request = new Request.Builder()
                 .url("https://factorio.zone/api/save/download")
@@ -101,7 +109,9 @@ public class FactorioManager {
                 .build();
         try {
             Response response = client.newCall(request).execute();
-            String fileName = new Timestamp(System.currentTimeMillis()).toString().replaceAll("-", "").replaceAll(":", "") + ".zip";
+            String fileName = "backup/"
+                    + new Timestamp(System.currentTimeMillis()).toString().replaceAll("-", "").replaceAll(":", "")
+                    + ".zip";
             byte[] bytes = response.body().bytes();
             Path filePath = Path.of(fileName);
             Files.write(filePath, bytes);
