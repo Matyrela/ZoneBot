@@ -10,17 +10,19 @@ public class Main {
 
 
     public static void main(String[] args) throws InterruptedException {
-        JDABuilder builder = JDABuilder.createDefault("MTE4MTMxODQwNTI3NDQ3MjU1OA.GwGB1Y.31DN6n_5BrN5hh5BapZVMdy5hhsxrym09QIHgs");
+        String discordToken = "";
+        JDABuilder builder = JDABuilder.createDefault("");
         builder.setActivity(Activity.playing("Factorio"));
         bot = builder.build();
         bot.addEventListener(new SlashHandler());
 
         bot.awaitReady();
 
-        bot.getGuildById(1181234881750106112L).updateCommands().addCommands(
+        bot.updateCommands().addCommands(
                 Commands.slash("start", "Starts the server"),
                 Commands.slash("stop", "Stops the server"),
-                Commands.slash("status", "Gets the status of the server")
+                Commands.slash("status", "Gets the status of the server"),
+                Commands.slash("backup", "Backs up the server")
         ).queue();
 
         FactorioManager fm = new FactorioManager("zY589s3DSQvFgWLIzVMD83", "sa-east-1", "1.1.100", "slot1");

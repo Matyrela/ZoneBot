@@ -16,6 +16,10 @@ public class SlashHandler extends ListenerAdapter {
                 event.reply("Deteniendo servidor...").queue();
                 FactorioManager.getInstance().stopServer();
                 break;
+            case "backup":
+                event.reply("Iniciando backup...").queue();
+                FactorioManager.getInstance().backupServer();
+                break;
         }
     }
 }

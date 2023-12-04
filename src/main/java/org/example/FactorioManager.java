@@ -83,4 +83,17 @@ public class FactorioManager {
             e.printStackTrace();
         }
     }
+
+    public void backupServer() {
+        if(launchId == -1){
+            System.out.println("Server not started");
+            return;
+        }
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create("https://factorio.zone/api/save/download"))
+                .header("Content-Type", "application/x-www-form-urlencoded")
+                .POST(HttpRequest.BodyPublishers.ofString(new Formatter().format("visitSecret=%s&launchId=%d", token).toString()))
+                .build();
+    }
 }
