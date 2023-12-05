@@ -13,6 +13,7 @@ public class Main {
         String factorioToken = ConfigManager.properties.getProperty("factorioToken");
         System.out.println(discordToken + " " + factorioToken);
         JDABuilder builder = JDABuilder.createDefault(discordToken);
+
         builder.setActivity(Activity.playing("Factorio"));
         bot = builder.build();
         bot.addEventListener(new SlashHandler());
@@ -26,6 +27,7 @@ public class Main {
                 Commands.slash("backup", "Backs up the server")
         ).queue();
         FactorioManager fm = new FactorioManager(factorioToken, "sa-east-1", "1.1.94", "slot1");
+
         System.out.println("Bot is ready!");
     }
 
