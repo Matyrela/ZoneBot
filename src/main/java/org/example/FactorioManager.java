@@ -1,14 +1,11 @@
 package org.example;
 
-import net.dv8tion.jda.internal.requests.WebSocketClient;
-
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.net.http.WebSocket;
 import java.util.Formatter;
-import java.util.concurrent.CompletionStage;
 
 public class FactorioManager {
     int launchId = -1;
@@ -27,23 +24,45 @@ public class FactorioManager {
         this.instance = this;
     }
 
-    //visitSecret=8f9tU1QQ5nWjS4qtDI5dnM&region=us-west-1&version=1.1.100&save=slot1
-
     public static FactorioManager getInstance(){
         return instance;
-
-        //connect to websocket wss://factorio.zone/ws
-
-
-
-
-
-
-
-
     }
 
-    public void startServer() {
+    String ip = "";
+
+    void socketStart(){
+        try {
+            WebSocketHandler client = new WebSocketHandler(new URI("wss://factorio.zone/ws"));
+            client.connect();
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+    }
+
+    static void forceSocketAsociation(String socketID){
+        System.out.println("Forcing socket asociation: " + socketID);
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create("https://factorio.zone/api/user/login"))
+                .header("Content-Type", "application/x-www-form-urlencoded")
+                .POST(HttpRequest.BodyPublishers.ofString(
+                        "userToken=" + Main.FactorioSecret +
+                                "&visitSecret=" + socketID +
+                                "&reconnected=false" +
+                                "&script=https://factorio.zone/cache/main.3310dda146457be60a23.js"
+                ))
+                .build();
+    }
+
+
+
+
+
+    public boolean startServer() {
+        if(launchId != -1){
+            System.out.println("Server already started");
+            return false;
+        }
+
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create("https://factorio.zone/api/instance/start"))
                 .header("Content-Type", "application/x-www-form-urlencoded")
@@ -54,9 +73,26 @@ public class FactorioManager {
         HttpClient client = HttpClient.newHttpClient();
         try {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            System.out.println(response.body());
+            if(!response.body().contains("launchId")){
+                System.out.println("Server not started");
+                Main.bot.getTextChannelById(1181234882609942570L).sendMessage("Error al iniciar servidor, ya esta iniciado").queue();
+                Main.bot.getTextChannelById(1181234882609942570L).sendMessage("Porfavor entrar a https://factorio.zone y apagar el server de forma manual").queue();
+                return false;
+            }
             launchId = Integer.parseInt(response.body().split(",\"launchId\":")[1].replace("}", ""));
+
+            if(launchId == -1){
+                System.out.println("Server not started");
+                return false;
+            }else{
+                System.out.println("Server started");
+                socketStart();
+                return true;
+            }
         } catch (Exception e) {
             e.printStackTrace();
+            return false;
         }
     }
 
@@ -77,11 +113,20 @@ public class FactorioManager {
         try {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-            System.out.println("Response Code: " + response.statusCode());
-            System.out.println("Response Body: " + response.body());
+            if(response.body().contains("instance stopped")){
+                System.out.println("Server stopped");
+                ip = "";
+                return;
+            }else{
+                System.out.println("Server not stopped");
+                return;
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
+            return;
         }
+
     }
 
     public void backupServer() {
@@ -95,5 +140,13 @@ public class FactorioManager {
                 .header("Content-Type", "application/x-www-form-urlencoded")
                 .POST(HttpRequest.BodyPublishers.ofString(new Formatter().format("visitSecret=%s&launchId=%d", token).toString()))
                 .build();
+    }
+
+    public String getStatus() {
+        if (ip != "") {
+            return "Online: " + ip;
+        } else {
+            return "Offline: puedes iniciar el servidor con /start";
+        }
     }
 }

@@ -8,14 +8,23 @@ public class SlashHandler extends ListenerAdapter {
     public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
         switch (event.getName()) {
             case "start":
-                event.reply("Iniciando servidor...").queue();
-                FactorioManager.getInstance().startServer();
+                if(FactorioManager.getInstance().startServer()){
+                    event.reply("Iniciando servidor...").queue();
+                }else{
+                    event.reply("Error al iniciar servidor").queue();
+                }
                 break;
 
             case "stop":
-                event.reply("Deteniendo servidor...").queue();
                 FactorioManager.getInstance().stopServer();
+                event.reply("Solicitud enviada...").queue();
                 break;
+
+            case "status":
+                event.reply("Obteniendo estado...").queue();
+                event.reply(FactorioManager.getInstance().getStatus()).queue();
+                break;
+
             case "backup":
                 event.reply("Iniciando backup...").queue();
                 FactorioManager.getInstance().backupServer();

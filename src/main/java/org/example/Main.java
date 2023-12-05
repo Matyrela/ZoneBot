@@ -8,10 +8,10 @@ import net.dv8tion.jda.api.interactions.commands.build.Commands;
 public class Main {
     static JDA bot;
 
+    static String FactorioSecret = "tLoiBM26EvPfgkPcgSCbmR";
 
     public static void main(String[] args) throws InterruptedException {
-        String discordToken = "";
-        JDABuilder builder = JDABuilder.createDefault("");
+        JDABuilder builder = JDABuilder.createDefault(args[0]);
         builder.setActivity(Activity.playing("Factorio"));
         bot = builder.build();
         bot.addEventListener(new SlashHandler());
@@ -25,7 +25,7 @@ public class Main {
                 Commands.slash("backup", "Backs up the server")
         ).queue();
 
-        FactorioManager fm = new FactorioManager("zY589s3DSQvFgWLIzVMD83", "sa-east-1", "1.1.100", "slot1");
+        FactorioManager fm = new FactorioManager(FactorioSecret, "sa-east-1", "1.1.100", "slot1");
 
         System.out.println("Bot is ready!");
     }
